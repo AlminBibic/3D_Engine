@@ -9,6 +9,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <Windows.h>
 #define GLEW_STATIC
 #include "GL/glew.h"	// Important - this header must come before glfw3 header
 #include "GLFW/glfw3.h"
@@ -28,7 +29,7 @@ int gWindowHeight = 768;
 GLFWwindow* gWindow = NULL;
 bool gWireframe = false;
 bool gFlashlightOn = true;
-glm::vec4 gClearColor(0.06f, 0.06f, 0.07f, 1.0f);
+glm::vec4 gClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 FPSCamera fpsCamera(glm::vec3(0.0f, 3.5f, 10.0f));
 const double ZOOM_SENSITIVITY = -3.0;
@@ -36,7 +37,7 @@ const float MOVE_SPEED = 5.0; // units per second
 const float MOUSE_SENSITIVITY = 0.1f;
 
 float rotationY = 0.0f;
-float rotSpeed = 0.1f;
+float rotSpeed = 0.3f;
 
 
 // Function prototypes
@@ -62,41 +63,40 @@ int main()
 	ShaderProgram lightingShader;
 	lightingShader.loadShaders("shaders/lighting_dir_point_spot.vert", "shaders/lighting_dir_point_spot.frag");
 
+	fpsCamera.rotate(0.0f, -25.0f);
 	// Load meshes and textures
-	const int numModels = 9;
+	const int numModels = 3;
 	Mesh mesh[numModels];
 	Texture2D texture[numModels];
 
-	mesh[0].loadOBJ("models/floor.obj");
-	mesh[1].loadOBJ("models/bunny.obj");
+	// Load Mesh
+	mesh[0].loadOBJ("models/bunny.obj");
+	mesh[1].loadOBJ("models/floor.obj");
 
 
-	texture[0].loadTexture("textures/tile_floor.jpg", true);
+	//Load Texture
+	texture[0].loadTexture("textures/bunny_diffuse.jpg", true);
+	texture[1].loadTexture("textures/tile_floor.jpg", true);
 
-	texture[1].loadTexture("textures/bunny_diffuse.jpg", true);
 
 	// Model positions
 	glm::vec3 modelPos[] = {
-
-		glm::vec3(0.0f, 0.0f, 0.0f),	// floor
-		glm::vec3(-2.0f, 0.0f, 2.0f),	// bunny
-
-	};
-
-	// Model scale
-	glm::vec3 modelScale[] = {
-
-		glm::vec3(10.0f, 1.0f, 10.0f),	// floor
-		glm::vec3(0.7f, 0.7f, 0.7f),	// bunny
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f)
 	};
 
 	float angle = 0.0f;
+	// Model scale
+	glm::vec3 modelScale[] = {
+		glm::vec3(1.0f, 1.0f, 1.0f),
+		glm::vec3(10.0f, 1.0f, 10.0f)
+	};
 
 	//Model rotation
 	glm::vec3 modelRot[] = {
-
 		glm::vec3(0.0f, 0.05f, 0.0f),
 		glm::vec3(0.0f, 0.05f, 0.0f)
+
 	};
 
 	float modelAngle[] = {
@@ -104,16 +104,17 @@ int main()
 		float(0.05f)
 	};
 
+
 	// Point Light positions
 	glm::vec3 pointLightPos[3] = {
-		glm::vec3(-5.0f, 3.8f, 0.0f),
-		glm::vec3(0.5f,  3.8f, 0.0f),
-		glm::vec3(5.0f,  3.8,  0.0f)
+		glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3(2.0f, 1.0f, 0.0f),
+		glm::vec3(-2.0f, 1.0f, 0.0f)
 	};
 
 
-	double lastTime = glfwGetTime();
 
+	double lastTime = glfwGetTime();
 	// Rendering loop
 	while (!glfwWindowShouldClose(gWindow))
 	{
@@ -125,13 +126,13 @@ int main()
 		// Poll for and process events
 		glfwPollEvents();
 		update(deltaTime);
-
-		//modelAngle[0] = rotationY;
-
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glm::mat4 model, view, projection;
+
+		modelAngle[0] = rotationY;
+
 
 		// Create the View matrix
 		view = fpsCamera.getViewMatrix();
@@ -163,7 +164,7 @@ int main()
 		// Point Light 1
 		lightingShader.setUniform("pointLights[0].ambient", glm::vec3(0.2f, 0.2f, 0.2f));
 		lightingShader.setUniform("pointLights[0].diffuse", glm::vec3(0.0f, 1.0f, 0.1f));	// green-ish light
-		lightingShader.setUniform("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		lightingShader.setUniform("pointLights[0].specular", glm::vec3(0.1f, 0.1f, 0.1f));
 		lightingShader.setUniform("pointLights[0].position", pointLightPos[0]);
 		lightingShader.setUniform("pointLights[0].constant", 1.0f);
 		lightingShader.setUniform("pointLights[0].linear", 0.22f);
@@ -172,7 +173,7 @@ int main()
 		// Point Light 2
 		lightingShader.setUniform("pointLights[1].ambient", glm::vec3(0.2f, 0.2f, 0.2f));
 		lightingShader.setUniform("pointLights[1].diffuse", glm::vec3(1.0f, 0.1f, 0.0f));	// red-ish light
-		lightingShader.setUniform("pointLights[1].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		lightingShader.setUniform("pointLights[1].specular", glm::vec3(0.1f, 0.1f, 0.1f));
 		lightingShader.setUniform("pointLights[1].position", pointLightPos[1]);
 		lightingShader.setUniform("pointLights[1].constant", 1.0f);
 		lightingShader.setUniform("pointLights[1].linear", 0.22f);
@@ -181,7 +182,7 @@ int main()
 		// Point Light 3
 		lightingShader.setUniform("pointLights[2].ambient", glm::vec3(0.2f, 0.2f, 0.2f));
 		lightingShader.setUniform("pointLights[2].diffuse", glm::vec3(0.0f, 0.1f, 1.0f));	// blue-ish light
-		lightingShader.setUniform("pointLights[2].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		lightingShader.setUniform("pointLights[2].specular", glm::vec3(0.1f, 0.1f, 0.1f));
 		lightingShader.setUniform("pointLights[2].position", pointLightPos[2]);
 		lightingShader.setUniform("pointLights[2].constant", 1.0f);
 		lightingShader.setUniform("pointLights[2].linear", 0.22f);
@@ -212,17 +213,18 @@ int main()
 			lightingShader.setUniform("model", model);
 
 			// Set material properties
-			lightingShader.setUniform("material.ambient", glm::vec3(0.1f, 0.1f, 0.1f));
+			lightingShader.setUniform("material.ambient", glm::vec3(0.5f, 0.5f, 0.5f));
 			lightingShader.setUniformSampler("material.diffuseMap", 0);
 			lightingShader.setUniform("material.specular", glm::vec3(0.8f, 0.8f, 0.8f));
-			lightingShader.setUniform("material.shininess", 32.0f);
+			lightingShader.setUniform("material.shininess", 50.0f);
+			lightingShader.setUniform("material.Opacity", 0.0f);
 
 			texture[i].bind(0);		// set the texture before drawing.  Our simple OBJ mesh loader does not do materials yet.
 			mesh[i].draw();			// Render the OBJ mesh
 			texture[i].unbind(0);
 		}
 
-				// Swap front and back buffers
+		// Swap front and back buffers
 		glfwSwapBuffers(gWindow);
 
 		lastTime = currentTime;
@@ -282,8 +284,7 @@ bool initOpenGL()
 	glfwSetInputMode(gWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPos(gWindow, gWindowWidth / 2.0, gWindowHeight / 2.0);
 
-	glClearColor(gClearColor.r, gClearColor.g, gClearColor.b, gClearColor.a);
-
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 	// Define the viewport dimensions
 	glViewport(0, 0, gWindowWidth, gWindowHeight);
 	glEnable(GL_DEPTH_TEST);
@@ -298,7 +299,7 @@ void glfw_onKey(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
-	
+
 	if (key == GLFW_KEY_F1 && action == GLFW_PRESS)
 	{
 		gWireframe = !gWireframe;
@@ -313,6 +314,7 @@ void glfw_onKey(GLFWwindow* window, int key, int scancode, int action, int mode)
 		// toggle the flashlight
 		gFlashlightOn = !gFlashlightOn;
 	}
+
 
 
 }
@@ -344,14 +346,20 @@ void glfw_onMouseScroll(GLFWwindow* window, double deltaX, double deltaY)
 //-----------------------------------------------------------------------------
 void update(double elapsedTime)
 {
+
+
+	rotationY += rotSpeed;
 	// Camera orientation
 	double mouseX, mouseY;
 
 	// Get the current mouse cursor position delta
 	glfwGetCursorPos(gWindow, &mouseX, &mouseY);
 
+
+
 	// Rotate the camera the difference in mouse distance from the center screen.  Multiply this delta by a speed scaler
 	fpsCamera.rotate((float)(gWindowWidth / 2.0 - mouseX) * MOUSE_SENSITIVITY, (float)(gWindowHeight / 2.0 - mouseY) * MOUSE_SENSITIVITY);
+
 
 	// Clamp mouse cursor to center of screen
 	glfwSetCursorPos(gWindow, gWindowWidth / 2.0, gWindowHeight / 2.0);
@@ -375,13 +383,6 @@ void update(double elapsedTime)
 		fpsCamera.move(MOVE_SPEED * (float)elapsedTime * glm::vec3(0.0f, 1.0f, 0.0f));
 	else if (glfwGetKey(gWindow, GLFW_KEY_X) == GLFW_PRESS)
 		fpsCamera.move(MOVE_SPEED * (float)elapsedTime * -glm::vec3(0.0f, 1.0f, 0.0f));
-
-
-	//Rotate Object
-	if (glfwGetKey(gWindow, GLFW_KEY_RIGHT) == GLFW_PRESS)
-	{
-		rotationY += rotSpeed;
-	}
 
 }
 

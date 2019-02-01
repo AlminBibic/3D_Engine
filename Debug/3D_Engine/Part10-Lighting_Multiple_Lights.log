@@ -1,1 +1,2 @@
-﻿LINK : fatal error LNK1168: cannot open .\3D_Engine.exe for writing
+﻿  Main.cpp
+  Part10-Lighting_Multiple_Lights.vcxproj -> E:\C++\OpenGLGame\New(Light)\3D_Engine\.\3D_Engine.exe
