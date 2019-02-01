@@ -35,6 +35,9 @@ const double ZOOM_SENSITIVITY = -3.0;
 const float MOVE_SPEED = 5.0; // units per second
 const float MOUSE_SENSITIVITY = 0.1f;
 
+float rotationY = 0.0f;
+float rotSpeed = 0.1f;
+
 
 // Function prototypes
 void glfw_onKey(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -87,6 +90,20 @@ int main()
 		glm::vec3(0.7f, 0.7f, 0.7f),	// bunny
 	};
 
+	float angle = 0.0f;
+
+	//Model rotation
+	glm::vec3 modelRot[] = {
+
+		glm::vec3(0.0f, 0.05f, 0.0f),
+		glm::vec3(0.0f, 0.05f, 0.0f)
+	};
+
+	float modelAngle[] = {
+		float(0.05f),
+		float(0.05f)
+	};
+
 	// Point Light positions
 	glm::vec3 pointLightPos[3] = {
 		glm::vec3(-5.0f, 3.8f, 0.0f),
@@ -108,6 +125,8 @@ int main()
 		// Poll for and process events
 		glfwPollEvents();
 		update(deltaTime);
+
+		//modelAngle[0] = rotationY;
 
 		// Clear the screen
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -189,7 +208,7 @@ int main()
 		// Render the scene
 		for (int i = 0; i < numModels; i++)
 		{
-			model = glm::translate(glm::mat4(), modelPos[i]) * glm::scale(glm::mat4(), modelScale[i]);
+			model = glm::translate(glm::mat4(), modelPos[i]) * glm::scale(glm::mat4(), modelScale[i]) * glm::rotate(glm::mat4(), glm::radians(modelAngle[i]), modelRot[i]);
 			lightingShader.setUniform("model", model);
 
 			// Set material properties
@@ -294,6 +313,8 @@ void glfw_onKey(GLFWwindow* window, int key, int scancode, int action, int mode)
 		// toggle the flashlight
 		gFlashlightOn = !gFlashlightOn;
 	}
+
+
 }
 
 //-----------------------------------------------------------------------------
@@ -354,6 +375,14 @@ void update(double elapsedTime)
 		fpsCamera.move(MOVE_SPEED * (float)elapsedTime * glm::vec3(0.0f, 1.0f, 0.0f));
 	else if (glfwGetKey(gWindow, GLFW_KEY_X) == GLFW_PRESS)
 		fpsCamera.move(MOVE_SPEED * (float)elapsedTime * -glm::vec3(0.0f, 1.0f, 0.0f));
+
+
+	//Rotate Object
+	if (glfwGetKey(gWindow, GLFW_KEY_RIGHT) == GLFW_PRESS)
+	{
+		rotationY += rotSpeed;
+	}
+
 }
 
 //-----------------------------------------------------------------------------
