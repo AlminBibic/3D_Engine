@@ -39,6 +39,8 @@ const float MOUSE_SENSITIVITY = 0.1f;
 float rotationY = 0.0f;
 float rotSpeed = 0.3f;
 
+float lightPos = 0.0f;
+
 
 // Function prototypes
 void glfw_onKey(GLFWwindow* window, int key, int scancode, int action, int mode);
@@ -65,35 +67,40 @@ int main()
 
 	fpsCamera.rotate(0.0f, -25.0f);
 	// Load meshes and textures
-	const int numModels = 3;
+	const int numModels = 4;
 	Mesh mesh[numModels];
 	Texture2D texture[numModels];
 
 	// Load Mesh
 	mesh[0].loadOBJ("models/bunny.obj");
 	mesh[1].loadOBJ("models/floor.obj");
+	mesh[2].loadOBJ("models/bowling_pin.obj");
 
 
 	//Load Texture
 	texture[0].loadTexture("textures/bunny_diffuse.jpg", true);
 	texture[1].loadTexture("textures/tile_floor.jpg", true);
+	texture[2].loadTexture("textures/AMF.tga", true);
 
 
 	// Model positions
 	glm::vec3 modelPos[] = {
 		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(0.0f, 0.0f, 0.0f)
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(5.0f,0.0f,0.0f)
 	};
 
 	float angle = 0.0f;
 	// Model scale
 	glm::vec3 modelScale[] = {
 		glm::vec3(1.0f, 1.0f, 1.0f),
-		glm::vec3(10.0f, 1.0f, 10.0f)
+		glm::vec3(10.0f, 1.0f, 10.0f),
+		glm::vec3(0.1f, 0.1f, 0.1f)
 	};
 
 	//Model rotation
 	glm::vec3 modelRot[] = {
+		glm::vec3(0.0f, 0.05f, 0.0f),
 		glm::vec3(0.0f, 0.05f, 0.0f),
 		glm::vec3(0.0f, 0.05f, 0.0f)
 
@@ -101,12 +108,13 @@ int main()
 
 	float modelAngle[] = {
 		float(0.05f),
+		float(0.05f),
 		float(0.05f)
 	};
 
 
 	// Point Light positions
-	glm::vec3 pointLightPos[3] = {
+	glm::vec3 pointLightPos[4] = {
 		glm::vec3(0.0f, 1.0f, 0.0f),
 		glm::vec3(2.0f, 1.0f, 0.0f),
 		glm::vec3(-2.0f, 1.0f, 0.0f)
@@ -187,6 +195,7 @@ int main()
 		lightingShader.setUniform("pointLights[2].constant", 1.0f);
 		lightingShader.setUniform("pointLights[2].linear", 0.22f);
 		lightingShader.setUniform("pointLights[2].exponent", 0.20f);
+
 
 		// Spot light
 		glm::vec3 spotlightPos = fpsCamera.getPosition();
